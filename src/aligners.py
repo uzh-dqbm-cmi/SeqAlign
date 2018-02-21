@@ -18,12 +18,12 @@ class GenericSeqNode():
        as nodes.
        
        Args:
-           label:
-           trans_time:
+           label: string, id/char/description of an event
+           trans_time:number, transition time between events
            
        Attributes:
-           label:
-           trans_time:
+           label: string, id/char/description of an event
+           trans_time:number, transition time between events
     """
     __slots__ = ['label', 'trans_time']
     def __init__(self, label, trans_time=None):
@@ -71,13 +71,13 @@ class SeqNode(GenericSeqNode):
        is represented by certain properties in a feature vector.
        
        Args:
-           label:
-           trans_time:
-           feat_vec:
+           label: string, id/char/description of an event
+           trans_time:number, transition time between events
+           feat_vec: numpy array, feature vector
        Attributes:
-           label:
-           trans_time:
-           feat_vec:
+           label: string, id/char/description of an event
+           trans_time:number, transition time between events
+           feat_vec: numpy array, feature vector
     """
     __slots__ = ['feat_vec']
     def __init__(self, label, feat_vec, trans_time=None):

@@ -1,7 +1,7 @@
 SeqAlign: Sequence Alignment
 ============================
 
-Sequence alignment done right -- Modules implementing sequence alignment algorithms correctly.. :). See this `paper <http://www.biorxiv.org/content/biorxiv/early/2015/11/12/031500.full.pdf>`__
+Sequence alignment done right -- Modules implementing sequence alignment algorithms correctly.. :). See this `paper by Flouri et al. <http://www.biorxiv.org/content/biorxiv/early/2015/11/12/031500.full.pdf>`__
 for further discussion about the correctness and completeness of sequence alignment algorithms.
 
 Moreover, the implemented alignment algorithms not only operate on sequences composed of character elements generated from a given alphabet, 
