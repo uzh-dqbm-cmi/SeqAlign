@@ -62,6 +62,9 @@ The current implementation allows for specifying:
 
 	- linear gap penalty
 	
+-------------------------------------
+
+
 License
 --------
 MIT License file accompanies this repository.
