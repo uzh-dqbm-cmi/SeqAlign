@@ -1,8 +1,8 @@
 SeqAlign: Sequence Alignment
 ============================
 
-Sequence alignment done right -- Modules implementing sequence alignment algorithms correctly.. :). See `this paper by Flouri et al. <http://www.biorxiv.org/content/biorxiv/early/2015/11/12/031500.full.pdf>`__
-for further discussion about the correctness and completeness of sequence alignment algorithms.
+Sequence alignment done right -- Modules implementing sequence alignment algorithms correctly.. 🤓. See `this paper by Flouri et al. <http://www.biorxiv.org/content/biorxiv/early/2015/11/12/031500.full.pdf>`__
+for further discussion about the correctness of sequence alignment algorithms.
 
 Moreover, the implemented alignment algorithms not only operate on sequences composed of character elements generated from a given alphabet, 
 but also on generic sequence elements (i.e. nodes) where each element/node has some feature vector representation. 
@@ -44,6 +44,7 @@ The current implementation allows for specifying:
 
 Temporal Aligner
 -----------------
+Based on the work reported in `Syed et al. Temporal Needleman-Wunsch <http://ieeexplore.ieee.org/document/7344785/>`__ and further expanded to support other alignment methods and penalties (see below).
 
 Supported alignment methods
 ++++++++++++++++++++++++++++
