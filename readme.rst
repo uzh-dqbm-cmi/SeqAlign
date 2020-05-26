@@ -10,6 +10,12 @@ In fact, elements could have arbitrary representation, but what is important is 
 
 -------------------------------------------
 
+Installation
+############
+
+* `git clone` the repo and `cd` into it.
+* Run `pip install -e .` to install the repo's python package.
+
 TODO
 -----
 

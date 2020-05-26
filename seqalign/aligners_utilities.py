@@ -3,7 +3,7 @@
 '''
 
 import numpy as np
-from aligners import CharSeqNode, SeqNode
+from .aligners import CharSeqNode, SeqNode
 
 
 def generate_char_seqnodes(s, t = []):

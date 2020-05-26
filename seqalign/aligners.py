@@ -43,9 +43,7 @@ class GenericSeqNode():
         """implement temporal penalty function -- in case of using temporal alignment
         """
         # implement the penalty function
-        T_penalty = kwargs.get("T_penalty")
-        if(not T_penalty):
-            T_penalty = 0.25
+        T_penalty = kwargs.get("T_penalty", 0.25)
         s = 0
         if(accum_tseq_1 or accum_tseq_2):
             s = T_penalty * np.abs(accum_tseq_1-accum_tseq_2)/max(accum_tseq_1, accum_tseq_2)
@@ -83,74 +81,34 @@ class SeqNode(GenericSeqNode):
     def __init__(self, label, feat_vec, trans_time=None):
         super().__init__(label, trans_time)
         self.feat_vec = np.array(feat_vec)
-        
-#     def compute_similarity(self, seq_node, **kwargs):
-#         # parse the method for computing the score
-#         if(not kwargs.get('score_type')):
-#             score_type = 'euclidean'
-#         # compute a score
-#         featvec_a = self.feat_vec
-#         featvec_b = seq_node.feat_vec
-#         if(score_type == 'euclidean'):
-#             distance = np.linalg.norm(featvec_a - featvec_b)
-#             score = 1/(1+distance)
-#         elif(score_type == 'manhatten'):
-#             distance = np.abs(featvec_a - featvec_b).sum()
-#             score = 1/(1+distance)
-#         elif(score_type == 'cosine'):
-#             try:
-#                 score = np.dot(featvec_a, featvec_b)/(np.linalg.norm(featvec_a)*np.linalg.norm(featvec_b))
-#             except ZeroDivisionError:
-#                 print('dividing by zero..')
-#             finally:
-#                 return(0)
-#         elif(score_type == 'jaccard'):
-#             # get activated features
-#             set_a_activef = set(np.where(featvec_a!=0)[0])
-#             set_b_activef = set(np.where(featvec_b!=0)[0])
-#             n_activef = len(set_a_activef.intersection(set_b_activef))
-#             # get non active features
-#             set_a_nonactivef = set(np.where(featvec_a==0)[0])
-#             set_b_nonactivef = set(np.where(featvec_b==0)[0])
-#             n_nonactivef = len(set_a_nonactivef.intersection(set_b_nonactivef))
-#             score = (n_activef+n_nonactivef)/(len(self.feat_vec))
-#         return(score)
 
     def compute_similarity(self, seq_node, **kwargs):
         """compute similarity between two feature vector representation using :module:``scipy.spatial.distance``
            Args:
                seq_node: instance of :class:`GenericSeqNode` or :class:`CharSeqNode` or :class:`SeqNode`
            Keyword args:
-               score_type: string, scoring option from {'euclidean', 'manhatten', 'cosine', 'jaccard', 'correlation'}
-               normalize_vec: bool, normalize feature vector components
+               score_type: string, scoring option from {'euclidean', 'manhattan', 'cosine', 'jaccard'}
                transform_score: bool, transform score to -1,1 range
-               
         """
         # compute a score
         featvec_a = np.asarray(self.feat_vec)
         featvec_b = np.asarray(seq_node.feat_vec)
-        # parse the method for computing the score
-        score_type = kwargs.get('score_type')
-        if(not score_type):
-            score_type = 'euclidean'
-            
-        normalize_vec = kwargs.get('normalize_vec')
-        if(normalize_vec):
-            featvec_a = featvec_a/np.sum(featvec_a)
-            featvec_b = featvec_b/np.sum(featvec_b)
-            
+        score_type = kwargs.get('score_type', 'euclidean') 
+        
+        # make sure to pick score metric supporting vectors with negative components
+        if np.all(featvec_a < 0) or np.all(featvec_b < 0):
+            if score_type == 'cosine':
+                score_type = 'angular_cosine'
+            elif score_type == 'jaccard':
+                score_type = 'angular_cosine'
+                print(f'changing the scoring type to {score_type}')        
+                   
         if(score_type == 'euclidean'):
             distance = scpydist.euclidean(featvec_a, featvec_b)
-            if(normalize_vec):
-                score = 1-distance
-            else:
-                score = 1/(1+distance)
-        elif(score_type == 'manhatten'):
+            score = 1/(1+distance)
+        elif(score_type == 'manhattan'):
             distance = scpydist.minkowski(featvec_a, featvec_b, 1)
-            if(normalize_vec):
-                score = 1-distance
-            else:
-                score = 1/(1+distance)
+            score = 1/(1+distance)
         elif(score_type == 'cosine'):
             try:
                 distance = scpydist.cosine(featvec_a, featvec_b)
@@ -159,15 +117,21 @@ class SeqNode(GenericSeqNode):
                 print('dividing by zero..')
             finally:
                 return(0)
+        elif(score_type == 'angular_cosine'):
+            try:
+                distance = scpydist.cosine(featvec_a, featvec_b)
+                score = 1-np.arccos(1-distance)/np.pi
+            except ZeroDivisionError:
+                print('dividing by zero..')
+            finally:
+                return(0)
         elif(score_type == 'jaccard'):
             # get activated features
             distance = scpydist.jaccard(featvec_a, featvec_b)
             score = 1-distance
-        elif(score_type == 'correlation'):
-            distance = scpydist.correlation(featvec_a, featvec_b)
-            score = 1-distance
+
         change_scale = kwargs.get('transform_score')
-        if(score_type != 'correlation' and change_scale):
+        if(change_scale):
             score = transform_scale(score, 0, 1)
         return(score)
 
@@ -329,15 +293,15 @@ class Aligner():
                              F[i-1, j-1] + sim_score] 
                     self._fill_dynamic_and_pointer_tables(v_vec, V, Vp, (i,j), main_dtable = True)
            
-            print("E ", E)
-            print("Ep ", Ep)
-            print("-"*50)
-            print("F ", F)
-            print("Fp ", Fp)
-            print("-"*50)
-            print("V ", V)
-            print("Vp ", Vp)
-            print("-"*50)
+            # print("E ", E)
+            # print("Ep ", Ep)
+            # print("-"*50)
+            # print("F ", F)
+            # print("Fp ", Fp)
+            # print("-"*50)
+            # print("V ", V)
+            # print("Vp ", Vp)
+            # print("-"*50)
             return(V, Vp, E, Ep, F, Fp, i, j)
 
     def _fill_dynamic_and_pointer_tables(self, vec, dynamic_table, pointer_table, pos, main_dtable = False):
@@ -734,10 +698,10 @@ class TemporalAligner(Aligner):
                                 TC_l[indx] = TC[i-1, j][0] 
                     TR[i, j] = tuple(TR_l)
                     TC[i, j] = tuple(TC_l)
-            print("TR ", TR)
-            print("TC ", TC)
-            print("V ", V)
-            print("Vp ", Vp)    
+            # print("TR ", TR)
+            # print("TC ", TC)
+            # print("V ", V)
+            # print("Vp ", Vp)    
             return(V, Vp, i, j)
 
         else: # case of affine gap applied

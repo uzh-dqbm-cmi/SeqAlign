@@ -2,8 +2,8 @@
 @author: ahmed allam <ahmed.allam@yale.edu>
 '''
 import numpy as np
-from aligners import TemporalAligner, Aligner, GapsParams
-from aligners_utilities import generate_char_seqnodes, custom_substitution_table
+from .aligners import TemporalAligner, Aligner, GapsParams
+from .aligners_utilities import generate_char_seqnodes, custom_substitution_table
 
 def test_tempaligner_1():
     """ this example comes from the original paper of temporal aligner `Syed et al. Temporal Needleman-Wunsch <http://ieeexplore.ieee.org/document/7344785/>`__
@@ -182,8 +182,9 @@ def test_aligner_5():
 def test_aligner_6():
     """ testing semi-global alignment 
         example coming from http://www.comp.nus.edu.sg/~ksung/algo_in_bioinfo/slides/Ch2_sequence_similarity.pdf
+        page 45. The example targets `overlap alignment` which is not implemented yet. Here we test `semi-global`
+        and `end-gap-free` alignment.
     """
-    #'semi-global':('ATCCGAACATCCAATCGAAGC', 'AGCATGCAAT'),
     align_options = {'semi-global':('TCAACGATCACCGCA', 'ACCTCACGATCCGA'),'end-gap-free':('TCAACGATCACCGCA', 'ACCTCACGATCCGA')}
     gap_open = -1
     match = 2
@@ -214,12 +215,50 @@ def test_aligner_6():
             print("".join(o2))
             print("~"*40)
         print("-"*40)
-    
+
+
+
 def test_aligner_7():
+    """ testing semi-global alignment 
+        example coming from http://www.comp.nus.edu.sg/~ksung/algo_in_bioinfo/slides/Ch2_sequence_similarity.pdf
+        page 44
+    """
+    align_options = {'semi-global':('ATCCGAACATCCAATCGAAGC', 'AGCATGCAAT')}
+    gap_open = -1
+    match = 2
+    mismatch = -1
+    for align_type, seq_tup in align_options.items():
+        aligner = Aligner(align_type)
+        s1, s2 = seq_tup
+        print("s1: ", s1)
+        print("s2: ", s2)
+        ls1 = generate_char_seqnodes(s1)
+        ls2 = generate_char_seqnodes(s2)
+        score_matrix = custom_substitution_table(set(s1).union(set(s2)), match, mismatch)
+        gaps_param = GapsParams(gap_open, gap_ext=None)
+        res = aligner.align(ls1, ls2, gaps_param, score_matrix = score_matrix)
+        all_paths = aligner.retrieve_alignments(*res)
+        print("alignment_type: ", align_type)
+        print("score_matrix \n", score_matrix)
+        print("gap_open:{} , gap_ext:{}".format(gap_open, None))
+        print("alignment paths:")
+        print(all_paths)
+        for path in all_paths[-1]:
+            o1=[]
+            o2=[]
+            for alignment in path:
+                o1.append(alignment[0])
+                o2.append(alignment[-1])
+            print("".join(o1))
+            print("".join(o2))
+            print("~"*40)
+        print("-"*40)
+
+def test_aligner_8():
     """ testing local alignment 
         example coming from http://www.comp.nus.edu.sg/~ksung/algo_in_bioinfo/slides/Ch2_sequence_similarity.pdf
+        page 41
     """
-    #'semi-global':('ATCCGAACATCCAATCGAAGC', 'AGCATGCAAT'),
     gap_open = -1
     match = 2
     mismatch = -1
@@ -253,6 +292,43 @@ def test_aligner_7():
         print("~"*40)
     print("-"*40)
     
+def test_aligner_9():
+    """ testing semi-global alignment 
+        example coming from https://ocw.mit.edu/courses/electrical-engineering-and-computer-science/6-096-algorithms-for-computational-biology-spring-2005/lecture-notes/lecture5_newest.pdf
+        page 22. The example targets `end-gap-free` alignment. This implementation tests both `end-gap-free` and `semi-global`
+        alignments.
+    """
+    align_options = {'semi-global':('CAGCACTTGGATTCTCGG', 'CAGCGTGG '),'end-gap-free':('CAGCACTTGGATTCTCGG', 'CAGCGTGG')}
+    gap_open = -2
+    match = 1
+    mismatch = -1
+    for align_type, seq_tup in align_options.items():
+        aligner = Aligner(align_type)
+        s1, s2 = seq_tup
+        print("s1: ", s1)
+        print("s2: ", s2)
+        ls1 = generate_char_seqnodes(s1)
+        ls2 = generate_char_seqnodes(s2)
+        score_matrix = custom_substitution_table(set(s1).union(set(s2)), match, mismatch)
+        gaps_param = GapsParams(gap_open, gap_ext=None)
+        res = aligner.align(ls1, ls2, gaps_param, score_matrix = score_matrix)
+        all_paths = aligner.retrieve_alignments(*res)
+        print("alignment_type: ", align_type)
+        print("score_matrix \n", score_matrix)
+        print("gap_open:{} , gap_ext:{}".format(gap_open, None))
+        print("alignment paths:")
+        print(all_paths)
+        for path in all_paths[-1]:
+            o1=[]
+            o2=[]
+            for alignment in path:
+                o1.append(alignment[0])
+                o2.append(alignment[-1])
+            print("".join(o1))
+            print("".join(o2))
+            print("~"*40)
+        print("-"*40)
+
 def scoremat_example1():
     # define score mat
     score_mat = {}
