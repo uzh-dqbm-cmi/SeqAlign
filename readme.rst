@@ -1,12 +1,11 @@
 SeqAlign: Sequence Alignment
 ============================
 
-Sequence alignment done right -- Modules implementing sequence alignment algorithms correctly.. 🤓. See `this paper by Flouri et al. <http://www.biorxiv.org/content/biorxiv/early/2015/11/12/031500.full.pdf>`__
+Sequence alignment done right -- Modules implementing sequence alignment algorithms correctly.. 🤓. See `the paper by Flouri et al. <http://www.biorxiv.org/content/biorxiv/early/2015/11/12/031500.full.pdf>`__
 for further discussion about the correctness of sequence alignment algorithms.
 
 Moreover, the implemented alignment algorithms not only operate on sequences composed of character elements generated from a given alphabet, 
-but also on generic sequence elements (i.e. nodes) where each element/node has some feature vector representation. 
-In fact, elements could have arbitrary representation, but what is important is to define/implement a similarity measure function that is able to compute elements similarity in the sequences being aligned.
+but also on generic sequence elements (i.e. nodes) where each element/node has some feature vector representation. We only need to define/implement a similarity measure/function that computes the similarity between the elements/nodes in the sequences being aligned.
 
 -------------------------------------------
 
